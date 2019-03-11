@@ -26,25 +26,30 @@
     path: "{{ openresty_build_path }}/bytecode"
     state: directory
 
-- name: compile LuaJIT jit modules 
-  command: >-
-    {{ compile_bytecode }} -n jit.{{ luajit_module_item_name }}
-    {{ item }} {{ openresty_build_path }}/bytecode/jit.{{ luajit_module_item_name }}.o
+- name: find lua files to be compiled to bytecode
+  command: >
+    find {{ item.find }} -printf "%P\n"
   args:
-    chdir: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src/jit"
-  with_lines: >-
-    find {{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src/jit
-    -name '*.lua' -printf '%P\n'
+    warn: false
+    chdir: "{{ item.chdir }}"
+  register: _bytecode_src
+  with_items:
+  - chdir: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src"
+    find: -path ./jit/*.lua
+  - chdir: "{{ openresty_build_path }}/destdir/usr/local/openresty/lualib"
+    find: -name *.lua
 
-- name: find LuaJIT openresty modules 
+- name: compile LuaJIT bytecode
   command: >-
     {{ compile_bytecode }} -n {{ luajit_module_item_name }}
-    {{ item }} {{ openresty_build_path }}/bytecode/{{ luajit_module_item_name }}.o
+    {{ item.1 }} {{ openresty_build_path }}/bytecode/{{ luajit_module_item_name }}.o
   args:
-    chdir: "{{ openresty_build_path }}/destdir/usr/local/openresty/lualib"
-  with_lines: >-
-    find {{ openresty_build_path }}/destdir/usr/local/openresty/lualib
-    -name '*.lua' -printf '%P\n'
+    chdir: "{{ item.0.item.chdir }}"
+  with_subelements:
+  - "{{ _bytecode_src.results }}"
+  - stdout_lines
+  loop_control:
+    label: "{{ luajit_module_item_name }}"
 
 - name: make bytecode.a
   shell: "ar rcus libbytecode.a bytecode/*.o"
@@ -54,4 +59,3 @@
 - name: set nginx ld-opt
   set_fact:
     _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -L{{ openresty_build_path }} -Wl,--whole-archive -lbytecode -Wl,--no-whole-archive"
-

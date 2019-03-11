@@ -125,10 +125,14 @@
     tar zcf {{ openresty_build_path }}/{{ _openresty_version.stdout }}.tar.gz
     --transform="flags=r;s|.*/objs/nginx|{{ openresty_install_prefix }}/sbin/nginx|"
     build/nginx-1.*/objs/nginx
+    {% if openresty_install_pod|bool %}
     --transform="flags=r;s|.*/\(pod/.*\)$|{{ openresty_install_prefix }}/\1|"
     bundle/pod/*
+    {% endif %}
+    {% if openresty_dynamic_modules|default([])|length > 0 %}
     --transform="flags=r;s|.*/objs/\(.*\.so\)$|{{ openresty_install_prefix }}/modules/\1|"
     build/nginx-1.*/objs/*.so
+    {% endif %}
   args:
     warn: false
     chdir: "{{ openresty_version_build_path }}"
