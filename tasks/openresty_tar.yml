@@ -1,0 +1,24 @@
+- name: clone bare repository to build-path
+  git:
+    repo: "{{ openresty_download_path }}/openresty.git"
+    dest: "{{ openresty_build_path }}/openresty-tmp"
+    depth: 1
+    version: "{{ openresty_git_version }}"
+
+- name: get openresty version name
+  command: "{{ openresty_build_path }}/openresty-tmp/util/ver"
+  register: _openresty_ver
+
+- name: make openresty source tar
+  command: >
+    make -C {{ openresty_build_path }}/openresty-tmp
+
+- name: copy openresty tar to download directory
+  copy:
+    src: "{{ openresty_build_path }}/openresty-tmp/openresty-{{ _openresty_ver.stdout }}.tar.gz"
+    dest: "{{ openresty_prebuilt_tar }}"
+
+- name: remove openresty tmp build directory
+  file:
+    path: "{{ openresty_build_path }}/openresty-tmp"
+    state: absent

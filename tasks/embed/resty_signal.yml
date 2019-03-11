@@ -1,0 +1,21 @@
+- name: register lua-resty-signal path
+  shell: "echo lua-resty-signal-*"
+  register: _resty_signal_dir
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle"
+
+- name: ensure resty.signal does not load shared lib
+  lineinfile:
+    path: "{{ openresty_version_build_path }}/bundle/{{ _resty_signal_dir.stdout }}/lib/resty/signal.lua"
+    line: "local resty_signal = C"
+    insertbefore: ' = load_shared_lib'
+
+- name: ensure resty.signal does not load shared lib
+  lineinfile:
+    path: "{{ openresty_version_build_path }}/bundle/{{ _resty_signal_dir.stdout }}/lib/resty/signal.lua"
+    regexp: ' = load_shared_lib'
+    state: absent
+
+- name: add resty_signal.o to ngx_ld_opt
+  set_fact:
+    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} {{ openresty_version_build_path }}/build/{{ _resty_signal_dir.stdout }}/resty_signal.o"

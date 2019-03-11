@@ -1,0 +1,4 @@
+openresty_prebuilt_tar: "{{ openresty_download_path }}/openresty-{{ _openresty_commit_id.stdout }}.tar.gz"
+luajit_module_item_name: "{{ item|replace('/', '.')|regex_replace('\\.lua$','') }}"
+openresty_module_dependencies: "{{ openresty_modules|default([]) }}"
+openresty_version_build_path: "{{ openresty_build_path }}/{{ _openresty_version.stdout }}"

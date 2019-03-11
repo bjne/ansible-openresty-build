@@ -1,0 +1,23 @@
+- name: download libatomic_ops version
+  get_url:
+    url: https://github.com/ivmai/libatomic_ops/releases/download/v{{ libatomic_ops_version }}/libatomic_ops-{{ libatomic_ops_version }}.tar.gz
+    dest: "{{ openresty_download_path }}/libatomic_ops-{{ libatomic_ops_version }}.tar.gz"
+    checksum: "{{ libatomic_ops_checksum }}"
+
+- name: create libatomic_ops build directory
+  file:
+    path: "{{ openresty_build_path }}/libatomic_ops"
+    state: directory
+
+- name: uncompress libatomic_ops
+  unarchive:
+    src: "{{ openresty_download_path }}/libatomic_ops-{{ libatomic_ops_version }}.tar.gz"
+    dest: "{{ openresty_build_path }}/libatomic_ops"
+    extra_opts:
+    - --strip-components=1
+
+- name: make symlink to let nginx find the library
+  command: ln -s .libs/libatomic_ops.a .
+  args:
+    warn: false
+    chdir: "{{ openresty_build_path }}/libatomic_ops/src"

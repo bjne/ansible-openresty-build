@@ -1,0 +1,17 @@
+- name: download pcre version
+  get_url:
+    url: https://ftp.pcre.org/pub/pcre/pcre-{{ pcre_version }}.tar.gz
+    dest: "{{ openresty_download_path }}/pcre-{{ pcre_version }}.tar.gz"
+    checksum: "{{ pcre_checksum }}"
+
+- name: create pcre build directory
+  file:
+    path: "{{ openresty_build_path }}/pcre"
+    state: directory
+
+- name: uncompress pcre
+  unarchive:
+    src: "{{ openresty_download_path }}/pcre-{{ pcre_version }}.tar.gz"
+    dest: "{{ openresty_build_path }}/pcre"
+    extra_opts:
+    - --strip-components=1

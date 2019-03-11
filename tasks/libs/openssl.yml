@@ -1,0 +1,26 @@
+- name: download openssl version
+  get_url:
+    url: https://www.openssl.org/source/openssl-{{ openssl_version }}.tar.gz
+    dest: "{{ openresty_download_path }}/openssl-{{ openssl_version }}.tar.gz"
+    checksum: "{{ openssl_checksum }}"
+
+- name: create openssl build directory
+  file:
+    path: "{{ openresty_build_path }}/openssl"
+    state: directory
+
+- name: uncompress openssl
+  unarchive:
+    src: "{{ openresty_download_path }}/openssl-{{ openssl_version }}.tar.gz"
+    dest: "{{ openresty_build_path }}/openssl"
+    extra_opts:
+    - --strip-components=1
+
+- name: patch openssl
+  shell: >
+    patch -p1 <{{ item }}
+  args:
+    chdir: "{{ openresty_build_path }}/openssl"
+  with_items:
+  - "{{ openresty_version_build_path }}/patches/openssl-1.1.0d-sess_set_get_cb_yield.patch"
+  - "{{ openresty_version_build_path }}/patches/openssl-1.1.0j-parallel_build_fix.patch"

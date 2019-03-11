@@ -1,0 +1,41 @@
+- name: 01 patch LuaJIT to embed cjson
+  lineinfile:
+    path: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src/lib_init.c"
+    insertafter: '#include "lj_arch.h"'
+    line: |
+
+      LUALIB_API int luaopen_cjson(lua_State *l);
+      LUALIB_API int luaopen_cjson_safe(lua_State *l);
+
+- name: 02 patch LuaJIT to embed cjson
+  lineinfile:
+    path: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src/lib_init.c"
+    insertafter: 'static const luaL_Reg lj_lib_preload'
+    line: |-
+      { "cjson",		luaopen_cjson },
+      { "cjson.safe",	luaopen_cjson_safe },
+
+- name: register cjson directory name
+  shell: "echo lua-cjson-*"
+  register: _cjson_dir
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle/"
+
+- name: build spesific cjson objects
+  command: >
+    make lua_cjson.o strbuf.o fpconv.o
+  environment:
+    LUA_INCLUDE_DIR: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src"
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle/{{ _cjson_dir.stdout }}"
+
+- name: create libcjson.a
+  command: >
+    ar rcus {{ openresty_build_path }}/libcjsonstatic.a lua_cjson.o strbuf.o fpconv.o
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle/{{ _cjson_dir.stdout }}"
+
+- name: add cjson to TARGET_LIBS
+  set_fact:
+    _luajit_target_libs: "{{ _luajit_target_libs|default('') }} -L{{ openresty_build_path }} -lcjsonstatic"
+    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -L{{ openresty_build_path }} -lluajit-5.1 -lcjsonstatic"

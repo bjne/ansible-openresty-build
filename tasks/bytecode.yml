@@ -1,0 +1,57 @@
+- name: expand lua module versions
+  shell: "echo {{ item }}-*"
+  register: _lua_modules
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle"
+  with_items: "{{ lua_modules }}"
+
+- name: create lualib directory
+  file:
+    path: "{{ openresty_build_path }}/destdir/usr/local/openresty/lualib"
+    state: directory
+
+- name: install lua-module
+  command: >-
+    make all install
+      DESTDIR={{ openresty_build_path }}/destdir
+      LUA_LIB_DIR=/usr/local/openresty/lualib
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle/{{ item.stdout }}"
+  with_items: "{{ _lua_modules.results }}"
+  loop_control:
+    label: "{{ item.stdout }}"
+
+- name: create bytecode directory
+  file:
+    path: "{{ openresty_build_path }}/bytecode"
+    state: directory
+
+- name: compile LuaJIT jit modules 
+  command: >-
+    {{ compile_bytecode }} -n jit.{{ luajit_module_item_name }}
+    {{ item }} {{ openresty_build_path }}/bytecode/jit.{{ luajit_module_item_name }}.o
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src/jit"
+  with_lines: >-
+    find {{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src/jit
+    -name '*.lua' -printf '%P\n'
+
+- name: find LuaJIT openresty modules 
+  command: >-
+    {{ compile_bytecode }} -n {{ luajit_module_item_name }}
+    {{ item }} {{ openresty_build_path }}/bytecode/{{ luajit_module_item_name }}.o
+  args:
+    chdir: "{{ openresty_build_path }}/destdir/usr/local/openresty/lualib"
+  with_lines: >-
+    find {{ openresty_build_path }}/destdir/usr/local/openresty/lualib
+    -name '*.lua' -printf '%P\n'
+
+- name: make bytecode.a
+  shell: "ar rcus libbytecode.a bytecode/*.o"
+  args:
+    chdir: "{{ openresty_build_path }}"
+
+- name: set nginx ld-opt
+  set_fact:
+    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -L{{ openresty_build_path }} -Wl,--whole-archive -lbytecode -Wl,--no-whole-archive"
+

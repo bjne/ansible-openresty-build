@@ -1,0 +1,134 @@
+- include_role:
+    name: "{{ module_name }}"
+  with_items:
+  - "{{ openresty_modules|default([]) }}"
+  - "{{ openresty_dynamic_modules|default([]) }}"
+  loop_control:
+    loop_var: module_name
+
+- name: download openresty bare repository
+  git:
+    repo: "https://github.com/openresty/openresty"
+    dest: "{{ openresty_download_path }}/openresty.git"
+    update: true
+    bare: true
+
+- name: get the last commit id
+  command: "git rev-parse {{ openresty_git_version }}"
+  args:
+    chdir: "{{ openresty_download_path }}/openresty.git"
+  register: _openresty_commit_id
+
+- name: check if prebuild openresty tar exists
+  stat:
+    path: "{{ openresty_prebuilt_tar }}"
+  register: _openresty_tar
+
+- name: recreate build directory
+  file:
+    path: "{{ openresty_build_path }}"
+    state: "{{ item }}"
+  with_items:
+  - absent
+  - directory
+
+- name: build openresty tar
+  include: openresty_tar.yml
+  when: _openresty_tar.stat.exists == False
+
+- name: uncompress openresty tar
+  unarchive:
+    src: "{{ openresty_prebuilt_tar }}"
+    dest: "{{ openresty_build_path }}"
+    copy: no
+
+- name: get openresty version
+  shell: echo openresty-*
+  register: _openresty_version
+  args:
+    chdir: "{{ openresty_build_path }}"
+
+- include: libs/pcre.yml
+
+- include: "libs/zlib-{{ zlib_variant }}.yml"
+
+- include: libs/openssl.yml
+
+- include: libs/libatomic_ops.yml
+
+- name: register LuaJIT bundle directory
+  shell: "echo LuaJIT-2*"
+  register: _luajit_dir
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle"
+
+- include: embed/cjson.yml
+  when: embed_lua_cjson|bool
+
+- include: embed/rds_parser.yml
+  when: embed_lua_rds_parser|bool
+
+- include: embed/redis_parser.yml
+  when: embed_lua_redis_parser|bool
+
+- include: embed/resty_signal.yml
+  when: embed_lua_resty_signal|bool
+
+- name: build bytecode
+  include: bytecode.yml
+
+# --modules-path=PATH                set modules path
+# --pid-path=PATH                    set nginx.pid pathname
+# --lock-path=PATH                   set nginx.lock pathname
+
+- name: configure openresty
+  command: >
+    ./configure -j10
+      --with-cc-opt="{{ openresty_cc_opt }}"
+      {% for module in openresty_modules|default([]) %}--add-module={{ openresty_module_path[module] }}{% endfor %}
+      {% for module in openresty_dynamic_modules|default([]) %}--add-dynamic-module={{ openresty_module_path[module] }}{% endfor %}
+      --prefix={{ openresty_install_prefix }}
+      --sbin-path={{ openresty_sbin_path }}
+      --modules-path={{ openresty_modules_path }}
+      --error-log-path={{ openresty_error_log_path }}
+      --with-ld-opt="{{ openresty_ld_opt|default('') }}{{ _ngx_ld_opt|default('') }}"
+      {{ '--with-threads' if openresty_with_threads|bool }}
+      {{ '--with-file-aio' if openresty_with_file_aio|bool }}
+      {{ '--with-http_v2_module' if openresty_with_http_v2_module|bool }}
+      {{ '--with-http_gunzip_module' if openresty_with_http_gunzip_module|bool }}
+      --with-pcre={{ openresty_build_path }}/pcre
+      {{ '--with-pcre-jit' if openresty_with_pcre_jit|bool }}
+      --with-pcre-conf-opt='--enable-utf'
+      --with-zlib={{ openresty_build_path }}/zlib
+      --with-openssl={{ openresty_build_path }}/openssl
+      {{ '--with-libatomic=' + openresty_build_path + '/libatomic_ops' if openresty_with_libatomic|bool }}
+  args:
+    chdir: "{{ openresty_version_build_path }}"
+  environment:
+    TARGET_LIBS: "{{ _luajit_target_libs }}"
+
+- name: remove libluajit.so to force static linking into nginx
+  shell: >
+    rm -f luajit-root/{{ openresty_install_prefix }}/luajit/lib/*.so*
+  args:
+    warn: false
+    chdir: "{{ openresty_version_build_path }}/build"
+  when: openresty_static_luajit|bool
+
+- name: build openresty
+  command: make -j10
+  args:
+    chdir: "{{ openresty_version_build_path }}"
+
+- name: create openresty.tar
+  shell: >-
+    tar zcf {{ openresty_build_path }}/{{ _openresty_version.stdout }}.tar.gz
+    --transform="flags=r;s|.*/objs/nginx|{{ openresty_install_prefix }}/sbin/nginx|"
+    build/nginx-1.*/objs/nginx
+    --transform="flags=r;s|.*/\(pod/.*\)$|{{ openresty_install_prefix }}/\1|"
+    bundle/pod/*
+    --transform="flags=r;s|.*/objs/\(.*\.so\)$|{{ openresty_install_prefix }}/modules/\1|"
+    build/nginx-1.*/objs/*.so
+  args:
+    warn: false
+    chdir: "{{ openresty_version_build_path }}"

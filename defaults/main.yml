@@ -1,0 +1,67 @@
+openresty_version: "1.15.8.1rc1"
+openresty_git_version: HEAD
+openresty_download_path: "/usr/src/openresty-ansible/download"
+openresty_build_path: "/usr/src/openresty-ansible/build"
+openresty_static_luajit: true
+openresty_install_prefix: "/opt/openresty-{{ openresty_version }}"
+
+libatomic_ops_version: 7.6.10
+libatomic_ops_checksum: >
+  sha256:587edf60817f56daf1e1ab38a4b3c729b8e846ff67b4f62a6157183708f099af
+
+pcre_version: 8.43
+pcre_checksum: >
+  sha256:0b8e7465dc5e98c757cc3650a20a7843ee4c3edf50aaf60bb33fd879690d2c73
+
+zlib_repo_cloudflare: "https://github.com/cloudflare/zlib"
+zlib_version_cloudflare: e55212b
+
+zlib_variant: cloudflare
+
+openssl_version: 1.1.0j
+openssl_checksum: >
+  sha256:31bec6c203ce1a8e93d5994f4ed304c63ccf07676118b6634edded12ad1b3246
+
+bytecode_keep_debug_info: false
+compile_bytecode: >-
+  luajit -O3 -b -s -t obj {{ '-g ' if bytecode_keep_debug_info|bool else '' }}
+
+lua_c_modules:
+- lua-cjson
+- lua-resty-signal
+- lua-redis-parser
+- lua-rds-parser
+
+embed_lua_cjson: true
+embed_lua_rds_parser: true
+embed_lua_redis_parser: true
+embed_lua_resty_signal: true
+
+openresty_cc_opt: "-O3"
+openresty_sbin_path: "{{ openresty_install_prefix }}/sbin/nginx"
+openresty_modules_path: "{{ openresty_install_prefix }}/module"
+openresty_error_log_path: stderr
+#openresty_ld_opt: ...
+openresty_with_threads: true
+openresty_with_file_aio: true
+openresty_with_http_v2_module: true
+openresty_with_http_gunzip_module: true
+openresty_with_pcre_jit: true
+openresty_with_libatomic: true
+
+lua_modules:
+- lua-resty-signal
+- lua-tablepool
+- lua-resty-limit-traffic
+- lua-resty-upstream-healthcheck
+- lua-resty-lock
+- lua-resty-shell
+- lua-resty-dns
+- lua-resty-mysql
+- lua-resty-redis
+- lua-resty-string
+- lua-resty-lrucache
+- lua-resty-upload
+- lua-resty-websocket
+- lua-resty-core
+- lua-resty-memcached

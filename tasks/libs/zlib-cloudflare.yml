@@ -1,0 +1,17 @@
+- name: clone cloudflare zlib bare repository
+  git:
+    repo: "{{ zlib_repo_cloudflare }}"
+    dest: "{{ openresty_download_path }}/zlib-{{ zlib_variant }}.git"
+    bare: true
+    update: true
+
+- name: clone bare zlib repository to build-path
+  git:
+    repo: "{{ openresty_download_path }}/zlib-{{ zlib_variant }}.git"
+    dest: "{{ openresty_build_path }}/zlib"
+    version: "{{ zlib_version_cloudflare }}"
+
+- name: configure cloudflare zlib (TODO)
+  command: ./configure --static --64
+  args:
+    chdir: "{{ openresty_build_path }}/zlib"
