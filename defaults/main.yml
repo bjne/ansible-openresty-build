@@ -62,8 +62,8 @@ openresty_bytecode_blacklist:
 - jit.dis_mips64el
 - jit.dis_mipsel
 - jit.dis_ppc
-- jit.dis_x64
 - jit.dis_x86
+#- jit.dis_x64
 
 lua_modules:
 - lua-resty-signal
