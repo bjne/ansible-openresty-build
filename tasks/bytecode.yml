@@ -48,6 +48,7 @@
   with_subelements:
   - "{{ _bytecode_src.results }}"
   - stdout_lines
+  when: luajit_module_item_name not in openresty_bytecode_blacklist
   loop_control:
     label: "{{ luajit_module_item_name }}"
 

@@ -50,6 +50,18 @@ openresty_with_http_gunzip_module: true
 openresty_with_pcre_jit: true
 openresty_with_libatomic: true
 
+openresty_bytecode_blacklist:
+- jit.dis_arm
+- jit.dis_arm64
+- jit.dis_arm64be
+- jit.dis_mips
+- jit.dis_mips64
+- jit.dis_mips64el
+- jit.dis_mipsel
+- jit.dis_ppc
+- jit.dis_x64
+- jit.dis_x86
+
 lua_modules:
 - lua-resty-signal
 - lua-tablepool
