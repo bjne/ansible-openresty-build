@@ -1,9 +1,8 @@
-openresty_version: "1.15.8.1rc1"
 openresty_git_version: HEAD
 openresty_download_path: "/usr/src/openresty-ansible/download"
 openresty_build_path: "/usr/src/openresty-ansible/build"
 openresty_static_luajit: true
-openresty_install_prefix: "/opt/openresty-{{ openresty_version }}"
+openresty_install_prefix: "/opt/{{ _openresty_version.stdout }}"
 
 libatomic_ops_version: 7.6.10
 libatomic_ops_checksum: >
