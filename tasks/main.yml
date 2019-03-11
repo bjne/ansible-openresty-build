@@ -85,8 +85,8 @@
   command: >
     ./configure -j10
       --with-cc-opt="{{ openresty_cc_opt }}"
-      {% for module in openresty_modules|default([]) %}--add-module={{ openresty_module_path[module] }}{% endfor %}
-      {% for module in openresty_dynamic_modules|default([]) %}--add-dynamic-module={{ openresty_module_path[module] }}{% endfor %}
+      {% for module in openresty_modules|default([]) %} --add-module={{ openresty_module_path[module] }}{% endfor %}
+      {% for module in openresty_dynamic_modules|default([]) %} --add-dynamic-module={{ openresty_module_path[module] }}{% endfor %}
       --prefix={{ openresty_install_prefix }}
       --conf-path={{ openresty_conf_path }}
       --sbin-path={{ openresty_sbin_path }}
