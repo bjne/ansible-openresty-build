@@ -121,9 +121,18 @@
   args:
     chdir: "{{ openresty_version_build_path }}"
 
+- name: strip nginx
+  shell: >
+    strip {{ openresty_strip_nginx }} {{ openresty_version_build_path }}/build/nginx-1.*/objs/nginx
+
+- name: strip dynamic modules
+  shell:
+    strip {{ openresty_strip_modules }} {{ openresty_version_build_path }}/build/nginx-1.*/objs/*.so
+  when: openresty_dynamic_modules|default([])|length > 0
+
 - name: create openresty.tar
   shell: >-
-    tar zcf {{ openresty_build_path }}/{{ _openresty_version.stdout }}.tar.gz
+    tar zcf {{ openresty_version_build_path }}.tar.gz
     --transform="flags=r;s|.*/objs/nginx|{{ openresty_install_prefix }}/sbin/nginx|"
     build/nginx-1.*/objs/nginx
     {% if openresty_install_pod|bool %}

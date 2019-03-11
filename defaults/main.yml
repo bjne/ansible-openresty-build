@@ -37,6 +37,9 @@ embed_lua_rds_parser: true
 embed_lua_redis_parser: true
 embed_lua_resty_signal: true
 
+openresty_strip_nginx: --strip-debug
+openresty_strip_modules: --strip-debug
+
 openresty_cc_opt: "-O3"
 openresty_conf_path: "{{ openresty_install_prefix }}/conf/nginx.conf"
 openresty_sbin_path: "{{ openresty_install_prefix }}/sbin/nginx"
