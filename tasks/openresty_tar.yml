@@ -17,6 +17,7 @@
   copy:
     src: "{{ openresty_build_path }}/openresty-tmp/openresty-{{ _openresty_ver.stdout }}.tar.gz"
     dest: "{{ openresty_prebuilt_tar }}"
+    remote_src: true
 
 - name: remove openresty tmp build directory
   file:

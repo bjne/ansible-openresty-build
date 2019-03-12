@@ -1,3 +1,7 @@
+openresty_build_dependencies:
+- build-essential
+- dos2unix
+
 openresty_git_version: HEAD
 openresty_download_path: "/usr/src/openresty-ansible/download"
 openresty_build_path: "/usr/src/openresty-ansible/build"
