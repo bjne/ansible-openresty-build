@@ -67,6 +67,9 @@
   args:
     chdir: "{{ openresty_version_build_path }}/bundle"
 
+- set_fact:
+    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} {{ openresty_ld_opt }}"
+
 - include: embed/cjson.yml
   when: embed_lua_cjson|bool
 

@@ -38,4 +38,4 @@
 - name: add cjson to TARGET_LIBS
   set_fact:
     _luajit_target_libs: "{{ _luajit_target_libs|default('') }} -L{{ openresty_build_path }} -lcjsonstatic"
-    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -L{{ openresty_build_path }} -lluajit-5.1 -lcjsonstatic"
+    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -lcjsonstatic"

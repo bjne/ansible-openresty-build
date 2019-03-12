@@ -36,4 +36,4 @@
 - name: add redisparser to TARGET_LIBS
   set_fact:
     _luajit_target_libs: "{{ _luajit_target_libs|default('') }} -L{{ openresty_build_path }} -lredisparser"
-    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -L{{ openresty_build_path }} -lluajit-5.1 -lredisparser"
+    _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} -lredisparser"
