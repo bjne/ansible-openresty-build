@@ -13,6 +13,7 @@
   unarchive:
     src: "{{ openresty_download_path }}/libatomic_ops-{{ libatomic_ops_version }}.tar.gz"
     dest: "{{ openresty_build_path }}/libatomic_ops"
+    copy: false
     extra_opts:
     - --strip-components=1
 

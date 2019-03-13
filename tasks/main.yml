@@ -140,7 +140,7 @@
 
 - name: create openresty.tar
   shell: >-
-    tar zcf {{ openresty_version_build_path }}.tar.gz
+    tar zcf {{ openresty_version_build_path }}-{{ _openresty_commit_id.stdout }}.tar.gz
     --transform="flags=r;s|.*/objs/nginx|{{ openresty_install_prefix }}/sbin/nginx|"
     build/nginx-1.*/objs/nginx
     {% if openresty_install_pod|bool %}
@@ -154,3 +154,9 @@
   args:
     warn: false
     chdir: "{{ openresty_version_build_path }}"
+
+- name: fetch archive to ansible controller
+  fetch:
+    src: "{{ openresty_version_build_path }}-{{ _openresty_commit_id.stdout }}.tar.gz"
+    dest: "{{ openresty_version_build_path|basename }}-{{ _openresty_commit_id.stdout }}.tar.gz"
+    flat: true

@@ -13,5 +13,6 @@
   unarchive:
     src: "{{ openresty_download_path }}/pcre-{{ pcre_version }}.tar.gz"
     dest: "{{ openresty_build_path }}/pcre"
+    copy: false
     extra_opts:
     - --strip-components=1

@@ -6,7 +6,7 @@ openresty_git_version: HEAD
 openresty_download_path: "/usr/src/openresty-ansible/download"
 openresty_build_path: "/usr/src/openresty-ansible/build"
 openresty_static_luajit: true
-openresty_install_prefix: "/opt/{{ _openresty_version.stdout }}"
+openresty_install_prefix: "/opt/{{ _openresty_version.stdout }}-{{ _openresty_commit_id.stdout }}"
 openresty_install_pod: false
 
 libatomic_ops_version: 7.6.10
