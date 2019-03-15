@@ -67,6 +67,8 @@
   args:
     chdir: "{{ openresty_version_build_path }}/bundle"
 
+- include: luajit.yml
+
 - set_fact:
     _ngx_ld_opt: "{{ _ngx_ld_opt|default('') }} {{ openresty_ld_opt }}"
 

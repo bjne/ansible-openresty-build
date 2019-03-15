@@ -28,7 +28,7 @@ openssl_checksum: >
 
 bytecode_keep_debug_info: false
 compile_bytecode: >-
-  luajit -O3 -b -s -t obj {{ '-g ' if bytecode_keep_debug_info|bool else '' }}
+  {{ openresty_build_path }}/bin/luajit -O3 -b {{ '-g ' if bytecode_keep_debug_info|bool else '-s' }}
 
 lua_c_modules:
 - lua-cjson
