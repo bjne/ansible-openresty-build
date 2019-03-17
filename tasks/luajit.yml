@@ -9,10 +9,10 @@
     warn: false
     chdir: "{{ openresty_version_build_path }}/bundle/{{ _luajit_dir.stdout }}/src"
   with_items:
-  - make TARGET_DEP=jit/vmdef.lua -j10 luajit
+  - make {{ luajit_compile_flags }} TARGET_DEP=jit/vmdef.lua -j10 luajit
   - eval $(find jit/ -name '*.lua' -printf './luajit -b -n jit.%f:%p %p.o;'|sed 's/.lua:/ /g')
   - rm -f luajit
-  - make TARGET_DEP=jit/vmdef.lua TARGET_LIBS="$(find jit -name '*.o' -printf '%p ')" luajit
+  - make {{ luajit_compile_flags }} TARGET_DEP=jit/vmdef.lua TARGET_LIBS="$(find jit -name '*.o' -printf '%p ')" luajit
   - cp luajit {{ openresty_build_path }}/bin
   - make clean
   - rm -f jit/*.o
