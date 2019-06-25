@@ -71,6 +71,15 @@ git clone https://github.com/bjne/ansible-openresty-build roles/ansible-openrest
 ansible-playbook site.yml
 ```
 
+Adding custom patches
+-----------------------
+
+Patches are stored in patches/{module}/{version}/{patch}.patch
+Patches that are defined in openresty_patches are applied pre openresty
+configure.
+
+patches have to be defined for the exact version of the module that is packed
+with the openresty version to be build.
 
 Author Information
 ------------------

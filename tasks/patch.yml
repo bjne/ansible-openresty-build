@@ -1,0 +1,20 @@
+- set_fact:
+    _module_dir: "{{ _mod }}"
+  when: _mod is match(_module_name + "-[0-9]")
+  with_items: "{{ _openresty_modules.stdout_lines }}"
+  loop_control:
+    loop_var: _mod
+
+- set_fact:
+    _module_version: >-
+      {{ _module_dir | regex_replace('^[^0-9]*([0-9.]*)$', '\1') }}
+
+- name: apply patches
+  shell: >-
+    patch -p1 <
+    ../../patches/{{ _module_name }}/{{ _module_version }}/{{ _patch }}.patch
+  args:
+    chdir: "{{ openresty_version_build_path }}/bundle/{{ _module_dir }}"
+  with_items: "{{ _patches }}"
+  loop_control:
+    loop_var: _patch

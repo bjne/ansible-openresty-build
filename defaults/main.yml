@@ -88,3 +88,11 @@ lua_modules:
 - lua-resty-websocket
 - lua-resty-core
 - lua-resty-memcached
+
+openresty_patches:
+  - module: "nginx"
+    patches:
+      - linux_abstract_sockets
+  - module: "ngx_stream_lua"
+    patches:
+      - linux_socket_peercred

@@ -1,0 +1,17 @@
+- name: copy custom patches
+  copy:
+    src: patches
+    dest: "{{ openresty_version_build_path }}"
+
+- name: list modules
+  register: _openresty_modules
+  command: "ls bundle"
+  args:
+    chdir: "{{ openresty_version_build_path }}"
+
+- name: apply custom patches
+  include_tasks: patch.yml
+  vars:
+    _module_name: "{{ item.module }}"
+    _patches: "{{ item.patches }}"
+  with_items: "{{ openresty_patches }}"

@@ -87,6 +87,9 @@
 - name: build bytecode
   include: bytecode.yml
 
+- name: apply custom patches
+  include: patches.yml
+
 # --modules-path=PATH                set modules path
 # --pid-path=PATH                    set nginx.pid pathname
 # --lock-path=PATH                   set nginx.lock pathname
