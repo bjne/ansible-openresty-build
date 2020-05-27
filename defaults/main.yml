@@ -1,8 +1,9 @@
 openresty_build_dependencies:
 - build-essential
 - dos2unix
+- mercurial
 
-openresty_git_version: HEAD
+openresty_git_version: master
 openresty_download_path: "/usr/src/openresty-ansible/download"
 openresty_build_path: "/usr/src/openresty-ansible/build"
 openresty_static_luajit: true
@@ -88,6 +89,9 @@ lua_modules:
 - lua-resty-websocket
 - lua-resty-core
 - lua-resty-memcached
+
+openresty_dynamic_modules: []
+openresty_modules: []
 
 openresty_patches:
   - module: "nginx"
